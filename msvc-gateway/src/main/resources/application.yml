@@ -1,0 +1,36 @@
+eureka:
+  client:
+    register-with-eureka: true
+server:
+  port: 8090
+spring:
+  application:
+    name: msvc-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+      - id: msvc-products
+        uri: lb://msvc-products
+        predicates:
+        - Path=/api/products/**
+#        - Header=token, 1234567
+#        - Method=GET, POST
+#        - Query=color, verde
+#        - Cookie=color, azul
+#        - Header=Content-Type, application/json
+        filters:
+        - StripPrefix=2
+        - SampleCookie= user, Leo, ¡Hola mi mensaje es personalizado para productos
+      - id: msvc-items
+        uri: lb://msvc-items
+        predicates:
+        - Path=/api/items/**
+        filters:
+        - StripPrefix=2
+        - AddRequestHeader=token-request, adhsadavdsopajdsakhdkaslkdskj
+        - AddResponseHeader=token-response, 232343243827
+        - AddRequestParameter=name, Leo
+        - SetResponseHeader=Content-Type, text/plain

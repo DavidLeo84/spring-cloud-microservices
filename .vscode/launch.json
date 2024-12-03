@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "MsvcItemsApplication",
+            "request": "launch",
+            "mainClass": "co.edu.uniquindio.MsvcItemsApplication",
+            "projectName": "msvc-items"
+        },
+        {
+            "type": "java",
+            "name": "MsvcProductsApplication<msvc-products> 8001",
+            "request": "launch",
+            "mainClass": "co.edu.uniquindio.MsvcProductsApplication",
+            "projectName": "msvc-products"
+        },
+        {
+            "type": "java",
+            "name": "MsvcProductsApplication<msvc-products> 9001",
+            "request": "launch",
+            "mainClass": "co.edu.uniquindio.MsvcProductsApplication",
+            "projectName": "msvc-products",
+            "vmArgs": "-Dserver.port=9001"
+        }
+    ]
+}
