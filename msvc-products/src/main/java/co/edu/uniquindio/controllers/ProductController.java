@@ -39,7 +39,7 @@ public class ProductController {
             throw new IllegalStateException("Product details not available");
         }
         if (id.equals(7L)) {
-            TimeUnit.SECONDS.sleep(1L);
+            TimeUnit.SECONDS.sleep(3L);
         }
         ProductDTO dto = productService.getProduct(id);
 
@@ -47,6 +47,7 @@ public class ProductController {
             return ResponseEntity.ok().body(this.productService.getProduct(id));
         }
         return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
+        //Bloque comentado para la implementación de las pruebas con el circuit-breaker
         /*try {
             ProductDTO dto =  productService.getProduct(id);
         }

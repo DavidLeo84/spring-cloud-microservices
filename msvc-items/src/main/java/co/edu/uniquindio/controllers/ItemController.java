@@ -3,20 +3,27 @@ package co.edu.uniquindio.controllers;
 import co.edu.uniquindio.entities.Item;
 import co.edu.uniquindio.entities.Product;
 import co.edu.uniquindio.services.ItemService;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+@RefreshScope
 @RestController
 public class ItemController {
 
@@ -24,10 +31,30 @@ public class ItemController {
     private final ItemService itemService;
     private final CircuitBreakerFactory breaker;
 
+    @Value("${configuration.text}")
+    private String text;
+    @Autowired
+    private Environment env;
+
     public ItemController(@Qualifier("itemServiceWebClient") ItemService itemService,
-                          CircuitBreakerFactory breaker) {
+                          CircuitBreakerFactory breaker/*, Environment env*/) {
         this.itemService = itemService;
         this.breaker = breaker;
+        //this.env = env;
+    }
+
+    @GetMapping("/fetch-config")
+    public ResponseEntity<?> fetchConfig(@Value("${server.port}") String port) {
+        Map<String, String> json = new HashMap<>();
+        json.put("text", text);
+        json.put("port", port);
+        logger.info(text);
+        logger.info(port);
+        if (env.getActiveProfiles().length > 0 && env.getActiveProfiles()[0].equals("dev")) {
+            json.put("author.name", env.getProperty("configuration.author.name"));
+            json.put("author.email", env.getProperty("configuration.author.email"));
+        }
+        return ResponseEntity.ok(json);
     }
 
     @GetMapping
@@ -40,7 +67,8 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id) throws WebClientResponseException {
-        Item item = breaker.create("items").run(() -> itemService.findById(id) /*, e ->{
+        //Bloque comentado para la implementación de las pruebas con el circuit-breaker
+        Item item = breaker.create("items").run(() -> itemService.findById(id) , e ->{
             logger.error(e.getMessage());
 
             Product product = new Product();
@@ -49,10 +77,63 @@ public class ItemController {
             product.setName("VHS SONY");
             product.setPrice(250.00);
             return new Item(product, 5);
-        }*/);
+        });
         if (item == null) {
             return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
         }
         return ResponseEntity.ok().body(item);
     }
+
+    @CircuitBreaker(name = "items", fallbackMethod = "getFallBackMethodProduct")
+    @GetMapping("/details/{id}")
+    public ResponseEntity<?> getOneById(@PathVariable Long id) throws WebClientResponseException {
+        Item item = itemService.findById(id);
+        if (item == null) {
+            return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
+        }
+        return ResponseEntity.ok().body(item);
+    }
+
+    @TimeLimiter(name = "items")
+    @CircuitBreaker(name = "items", fallbackMethod = "getFallBackMethodProduct2")
+    @GetMapping("/details2/{id}")
+    public CompletableFuture<ResponseEntity<?>> getById(@PathVariable Long id) throws WebClientResponseException {
+        return CompletableFuture.supplyAsync(() -> {
+
+            Item item = itemService.findById(id);
+            if (item == null) {
+                return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
+            }
+            return ResponseEntity.ok().body(item);
+        });
+    }
+
+
+    public ResponseEntity<?> getFallBackMethodProduct(Throwable e) {
+
+            logger.error(e.getMessage());
+
+            Product product = new Product();
+            product.setCreateAt(LocalDate.now());
+            product.setId(1L);
+            product.setName("VHS SONY");
+            product.setPrice(250.00);
+            return ResponseEntity.ok( new Item(product, 5));
+    }
+
+
+    public CompletableFuture<ResponseEntity<?>> getFallBackMethodProduct2(Throwable e) {
+        return CompletableFuture.supplyAsync(() -> {
+
+            logger.error(e.getMessage());
+
+            Product product = new Product();
+            product.setCreateAt(LocalDate.now());
+            product.setId(1L);
+            product.setName("VHS SONY");
+            product.setPrice(250.00);
+            return ResponseEntity.ok( new Item(product, 5));
+        });
+    }
+
 }

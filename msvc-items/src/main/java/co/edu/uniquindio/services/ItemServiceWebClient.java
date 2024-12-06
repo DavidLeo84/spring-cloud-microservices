@@ -39,6 +39,7 @@ public class ItemServiceWebClient implements ItemService {
     public Item findById(Long id) throws WebClientResponseException {
         Map<String, Long> params = new HashMap<>();
         params.put("id", id);
+        //Bloque comentado para la implementación de las pruebas con el circuit-breaker
         //try {
             return webClient.build().get().uri("/{id}", params)
                     .accept(MediaType.APPLICATION_JSON)

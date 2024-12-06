@@ -27,6 +27,7 @@
         <module>msvc-items</module>
         <module>msvc-eureka</module>
         <module>msvc-gateway</module>
+        <module>msvc-config-server</module>
     </modules>
     <dependencies>
         <dependency>
