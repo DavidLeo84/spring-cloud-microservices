@@ -1,6 +1,7 @@
 package co.edu.uniquindio.services;
 
 import co.edu.uniquindio.client.ProductFeignClient;
+import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
 import co.edu.uniquindio.entities.Product;
 import feign.FeignException;
@@ -41,5 +42,32 @@ public class ItemServiceFeign implements ItemService{
         catch (FeignException e) {
             return null;
         }
+    }
+
+    @Override
+    public void saveProduct(ProductDTO dto) {
+        productFeignClient.createProduct(dto);
+    }
+
+    @Override
+    public ProductDTO updateProduct(ProductDTO dto) throws Exception {
+        try {
+            productFeignClient.updateProduct(dto);
+        }
+        catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+       return productFeignClient.updateProduct(dto);
+
+    }
+
+    @Override
+    public void delete(Long id) throws Exception {
+        try {
+            productFeignClient.deleteProduct(id);
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+
     }
 }

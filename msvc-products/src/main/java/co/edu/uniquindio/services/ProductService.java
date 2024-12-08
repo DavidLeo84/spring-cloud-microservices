@@ -9,7 +9,7 @@ import java.util.List;
 public interface ProductService {
 
     void createProduct(ProductDTO dto);
-    void updateProduct(ProductDTO dto, Long id) throws Exception;
+    ProductDTO updateProduct(ProductDTO dto) throws Exception;
     void deleteProduct(Long id) throws Exception;
     List<ProductDTO> getProducts() throws Exception;
     ProductDTO getProduct(Long id) throws InterruptedException;

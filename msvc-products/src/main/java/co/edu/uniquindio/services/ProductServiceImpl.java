@@ -7,6 +7,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,14 +29,15 @@ public class ProductServiceImpl implements ProductService{
         Product nuevo = Product.builder()
                 .name(dto.name())
                 .price(dto.price())
-                .createAt(dto.createAt())
+                .createAt(LocalDate.now())
                 .build();
+        productRepository.save(nuevo);
     }
 
     @Override
-    public void updateProduct(ProductDTO dto, Long id) throws Exception {
+    public ProductDTO updateProduct(ProductDTO dto) throws Exception {
 
-        Optional<Product> optional = productRepository.findById(id);
+        Optional<Product> optional = productRepository.findById(dto.id());
 
         if (!optional.isPresent()) {
             throw new Exception("No existe el producto");
@@ -43,8 +45,14 @@ public class ProductServiceImpl implements ProductService{
         Product product = optional.get();
         product.setName(dto.name());
         product.setPrice(dto.price());
-        product.setCreateAt(dto.createAt());
         productRepository.save(product);
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                LocalDate.now(),
+                product.getPort()
+        );
 
     }
 

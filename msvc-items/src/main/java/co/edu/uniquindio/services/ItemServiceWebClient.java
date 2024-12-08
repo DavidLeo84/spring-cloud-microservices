@@ -1,5 +1,6 @@
 package co.edu.uniquindio.services;
 
+import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
 import co.edu.uniquindio.entities.Product;
 //import org.springframework.context.annotation.Primary;
@@ -50,5 +51,46 @@ public class ItemServiceWebClient implements ItemService {
         /*} catch (WebClientResponseException e) {
             return null;
         }*/
+    }
+
+    @Override
+    public void saveProduct(ProductDTO dto) {
+
+        webClient.build()
+                .post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(dto)
+                .retrieve()
+                .bodyToMono(Product.class)
+                .block();
+    }
+
+    @Override
+    public ProductDTO updateProduct(ProductDTO dto) {
+        Map<String, Long> params = new HashMap<>();
+        params.put("id", dto.id());
+        return webClient.build()
+                .put()
+                .uri("", params)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(dto)
+                .retrieve()
+                .bodyToMono(ProductDTO.class)
+                .block();
+
+    }
+
+    @Override
+    public void delete(Long id) {
+
+        Map<String, Long> params = new HashMap<>();
+        params.put("id", id);
+        webClient.build()
+                .delete()
+                .uri("/{id}", params)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
     }
 }

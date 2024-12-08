@@ -1,5 +1,6 @@
 package co.edu.uniquindio.controllers;
 
+import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
 import co.edu.uniquindio.entities.Product;
 import co.edu.uniquindio.services.ItemService;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -34,6 +36,7 @@ public class ItemController {
     @Value("${configuration.text}")
     private String text;
     @Autowired
+    //Acceso a los variables de entorno del bootstrap.properties
     private Environment env;
 
     public ItemController(@Qualifier("itemServiceWebClient") ItemService itemService,
@@ -134,6 +137,35 @@ public class ItemController {
             product.setPrice(250.00);
             return ResponseEntity.ok( new Item(product, 5));
         });
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createProduct(@RequestBody ProductDTO dto) {
+        itemService.saveProduct(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("message", "Producto creado"));
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateProduct(@RequestBody ProductDTO dto) throws Exception {
+
+        try {
+            itemService.updateProduct(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(itemService.updateProduct(dto));
+        }
+        catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) throws Exception {
+        try {
+            itemService.delete(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Collections.singletonMap("message", "Producto eliminado"));
+        }
+        catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }
