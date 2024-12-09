@@ -1,5 +1,6 @@
 package co.edu.uniquindio.entities;
 
+import co.edu.uniquindio.libs.commons.msvc.libs.commons.entities.Product;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

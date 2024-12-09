@@ -1,4 +1,4 @@
-package co.edu.uniquindio.entities;
+package co.edu.uniquindio.libs.commons.msvc.libs.commons.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

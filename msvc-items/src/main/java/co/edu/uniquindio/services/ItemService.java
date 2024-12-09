@@ -2,7 +2,6 @@ package co.edu.uniquindio.services;
 
 import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
-import co.edu.uniquindio.entities.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import java.util.List;

@@ -1,20 +1,19 @@
 package co.edu.uniquindio.services;
 
 import co.edu.uniquindio.dtos.ProductDTO;
-import co.edu.uniquindio.entities.Product;
+
+import co.edu.uniquindio.libs.commons.msvc.libs.commons.entities.Product;
 import co.edu.uniquindio.repositories.ProductRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final Environment env;
@@ -36,10 +35,8 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public ProductDTO updateProduct(ProductDTO dto) throws Exception {
-
         Optional<Product> optional = productRepository.findById(dto.id());
-
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             throw new Exception("No existe el producto");
         }
         Product product = optional.get();
@@ -61,7 +58,7 @@ public class ProductServiceImpl implements ProductService{
 
         Optional<Product> optional = productRepository.findById(id);
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             throw new Exception("No existe el producto");
         }
         Product product = optional.get();
@@ -76,7 +73,6 @@ public class ProductServiceImpl implements ProductService{
             throw new Exception("La lista esta vacía");
         }
         list.stream().forEach(p -> p.setPort(Integer.parseInt(env.getProperty("local.server.port"))));
-
         return list.stream().map(p -> new ProductDTO(
                 p.getId(),
                 p.getName(),
@@ -92,7 +88,7 @@ public class ProductServiceImpl implements ProductService{
 
         Optional<Product> optional = productRepository.findById(id);
 
-        if (!optional.isPresent()) {
+        if (optional.isEmpty()) {
             throw new InterruptedException("No existe el producto");
         }
         Product product = optional.get();

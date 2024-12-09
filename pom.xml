@@ -28,6 +28,8 @@
         <module>msvc-eureka</module>
         <module>msvc-gateway</module>
         <module>msvc-config-server</module>
+        <module>msvc-libs-commons</module>
+        <module>msvc-users</module>
     </modules>
     <dependencies>
         <dependency>

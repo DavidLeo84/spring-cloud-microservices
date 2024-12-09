@@ -2,13 +2,12 @@ package co.edu.uniquindio.controllers;
 
 import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
-import co.edu.uniquindio.entities.Product;
+import co.edu.uniquindio.libs.commons.msvc.libs.commons.entities.Product;
 import co.edu.uniquindio.services.ItemService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
@@ -25,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
 @RefreshScope
 @RestController
 public class ItemController {
@@ -35,15 +35,15 @@ public class ItemController {
 
     @Value("${configuration.text}")
     private String text;
-    @Autowired
+
     //Acceso a los variables de entorno del bootstrap.properties
-    private Environment env;
+    private final Environment env;
 
     public ItemController(@Qualifier("itemServiceWebClient") ItemService itemService,
-                          CircuitBreakerFactory breaker/*, Environment env*/) {
+                          CircuitBreakerFactory breaker, Environment env) {
         this.itemService = itemService;
         this.breaker = breaker;
-        //this.env = env;
+        this.env = env;
     }
 
     @GetMapping("/fetch-config")
@@ -146,7 +146,7 @@ public class ItemController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateProduct(@RequestBody ProductDTO dto) throws Exception {
+    public ResponseEntity<?> updateProduct(@RequestBody ProductDTO dto){
 
         try {
             itemService.updateProduct(dto);
@@ -158,7 +158,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) throws Exception {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         try {
             itemService.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Collections.singletonMap("message", "Producto eliminado"));

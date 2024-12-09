@@ -2,8 +2,8 @@ package co.edu.uniquindio.services;
 
 import co.edu.uniquindio.dtos.ProductDTO;
 import co.edu.uniquindio.entities.Item;
-import co.edu.uniquindio.entities.Product;
 //import org.springframework.context.annotation.Primary;
+import co.edu.uniquindio.libs.commons.msvc.libs.commons.entities.Product;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;

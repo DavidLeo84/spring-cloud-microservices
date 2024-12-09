@@ -1,7 +1,7 @@
 package co.edu.uniquindio.client;
 
 import co.edu.uniquindio.dtos.ProductDTO;
-import co.edu.uniquindio.entities.Product;
+import co.edu.uniquindio.libs.commons.msvc.libs.commons.entities.Product;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

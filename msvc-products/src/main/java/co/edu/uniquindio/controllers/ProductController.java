@@ -2,7 +2,6 @@ package co.edu.uniquindio.controllers;
 
 import co.edu.uniquindio.dtos.MessageDTO;
 import co.edu.uniquindio.dtos.ProductDTO;
-import co.edu.uniquindio.entities.Product;
 import co.edu.uniquindio.services.ProductService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Controller
 public class ProductController {
