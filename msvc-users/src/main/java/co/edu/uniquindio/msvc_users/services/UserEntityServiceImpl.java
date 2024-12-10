@@ -1,74 +1,128 @@
 package co.edu.uniquindio.msvc_users.services;
 
-import co.edu.uniquindio.msvc_users.Dtos.UserEntityDTO;
-import co.edu.uniquindio.msvc_users.entities.UsersEntity;
+import co.edu.uniquindio.msvc_users.dtos.RoleDTO;
+import co.edu.uniquindio.msvc_users.dtos.UpdateDTO;
+import co.edu.uniquindio.msvc_users.dtos.UserEntityDTO;
+import co.edu.uniquindio.msvc_users.entities.RoleEntity;
+import co.edu.uniquindio.msvc_users.entities.UserEntity;
+import co.edu.uniquindio.msvc_users.repositories.RoleRepository;
 import co.edu.uniquindio.msvc_users.repositories.UserEntityRepository;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserEntityServiceImpl implements UserEntityService {
 
     private final UserEntityRepository repository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
 
-    public UserEntityServiceImpl(UserEntityRepository repository) {
+    public UserEntityServiceImpl(UserEntityRepository repository, PasswordEncoder encoder,
+                                 RoleRepository roleRepository) {
         this.repository = repository;
+        this.encoder = encoder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
     @Transactional
-    public UserEntityDTO saveUser(UserEntityDTO dto) {
-
-        UsersEntity usersEntity = UsersEntity.builder()
-                .username(dto.username())
-                .password(dto.password())
-                .email(dto.email())
-                .enabled(true)
-                .build();
-        repository.save(usersEntity);
-        return new UserEntityDTO(
-                usersEntity.getId(),
-                usersEntity.getUsername(),
-                usersEntity.getPassword(),
-                usersEntity.getEmail());
-    }
-
-    @Override
-    @Transactional
-    public UserEntityDTO updateUser(UserEntityDTO dto) {
+    public void saveUser(UserEntityDTO dto) {
+        List<RoleEntity> roles = new ArrayList<>();
         try {
-            UsersEntity usersEntity = repository.findById(dto.id()).orElseThrow();
-            usersEntity.setUsername(dto.username());
-            usersEntity.setPassword(dto.password());
-            usersEntity.setEmail(dto.email());
-            repository.save(usersEntity);
-            return new UserEntityDTO(
-                    usersEntity.getId(),
-                    usersEntity.getUsername(),
-                    usersEntity.getPassword(),
-                    usersEntity.getEmail());
+            Optional<UserEntity> optional = repository.findByUsernameAndEnabled(dto.username(), true);
+            if (optional.isPresent()) {
+                throw new NoSuchElementException();
+            }
+            Optional<UserEntity> optional2 = repository.findByEmailAndEnabled(dto.email(), true);
+            if (optional2.isPresent()) {
+                throw new NoSuchElementException();
+            }
+            Optional<RoleEntity> optionalRole = roleRepository.findByName("ROLE_USER");
+            optionalRole.ifPresent(roles::add);
+            //optionalRole.ifPresent(role -> roles.add(role)); forma alternativa
+            if (dto.admin())  {
+                Optional<RoleEntity> roleOptional = roleRepository.findByName("ROLE_ADMIN");
+                roleOptional.ifPresent(roles::add);
+            }
+            UserEntity userEntity = UserEntity.builder()
+                    .username(dto.username())
+                    .password(encoder.encode(dto.password()))
+                    .email(dto.email())
+                    .enabled(true)
+                    .roles(roles)
+                    .build();
+            repository.save(userEntity);
         }
-        catch (NoSuchElementException e) {
+        catch (NoSuchElementException e){
+            throw new NoSuchElementException("User already exists");
+        }
+    }
+
+    @Override
+    @Transactional
+    public UserEntityDTO updateUser(Long id, UpdateDTO dto) throws Throwable {
+        try {
+            UserEntity userEntity = repository.findByIdAndEnabled(id, true).orElseThrow();
+            if (userEntity.getEmail().equals(dto.email()) && userEntity.getUsername().equals(dto.username()) && !userEntity.isAdmin()) {
+                throw new NoSuchElementException();
+            }
+            List<RoleEntity> roles = userEntity.getRoles();
+            Optional<RoleEntity> roleOptional = roleRepository.findByName("ROLE_ADMIN");
+            if (!dto.admin()) {
+                roleOptional.ifPresent(roles::remove);
+            } else{
+                roleOptional.ifPresent(roles::add);
+            }
+            userEntity.setUsername(dto.username());
+            userEntity.setEmail(dto.email());
+            userEntity.setRoles(roles);
+
+            repository.save(userEntity);
+            return new UserEntityDTO(
+                    String.valueOf(userEntity.getId()),
+                    userEntity.getUsername(),
+                    userEntity.getPassword(),
+                    userEntity.getEmail(),
+                    userEntity.isAdmin(),
+                    userEntity.getRoles()
+                            .stream()
+                            .map(role -> new RoleDTO(
+                                    role.getId(),
+                                    role.getName()
+                            )).toList());
+        } catch (NoSuchElementException e) {
             throw new NoSuchElementException("User not found");
         }
+        catch (Throwable e) {
+            throw new Throwable("User already exists");
+        }
+
+
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserEntityDTO getUserById(Long id) {
         try {
-            UsersEntity usersEntity = repository.findByIdAndEnabled(id, true).orElseThrow();
+            UserEntity userEntity = repository.findByIdAndEnabled(id, true).orElseThrow();
             return new UserEntityDTO(
-                    usersEntity.getId(),
-                    usersEntity.getUsername(),
-                    usersEntity.getPassword(),
-                    usersEntity.getEmail());
-        }
-        catch (NoSuchElementException e) {
+                    String.valueOf(userEntity.getId()),
+                    userEntity.getUsername(),
+                    userEntity.getPassword(),
+                    userEntity.getEmail(),
+                    userEntity.isAdmin(),
+                    userEntity.getRoles()
+                            .stream()
+                            .map(role -> new RoleDTO(
+                                    role.getId(),
+                                    role.getName()
+                            )).toList()
+            );
+        } catch (NoSuchElementException e) {
             throw new NoSuchElementException("User not found");
         }
     }
@@ -76,30 +130,43 @@ public class UserEntityServiceImpl implements UserEntityService {
     @Override
     @Transactional(readOnly = true)
     public UserEntityDTO getUserByUsername(String email, boolean state) {
-            Optional<UsersEntity> optional = repository.findByUsernameAndEnabled(email, true);
-            if (optional.isEmpty()) {
-                throw new NoSuchElementException("User not found");
-            }
-            UsersEntity usersEntity = optional.get();
-            return new UserEntityDTO(
-                    usersEntity.getId(),
-                    usersEntity.getUsername(),
-                    usersEntity.getPassword(),
-                    usersEntity.getEmail());
+        Optional<UserEntity> optional = repository.findByUsernameAndEnabled(email, true);
+        if (optional.isEmpty()) {
+            throw new NoSuchElementException("User not found");
+        }
+        UserEntity userEntity = optional.get();
+        return new UserEntityDTO(
+                String.valueOf(userEntity.getId()),
+                userEntity.getUsername(),
+                userEntity.getPassword(),
+                userEntity.getEmail(),
+                userEntity.isAdmin(),
+                userEntity.getRoles()
+                        .stream()
+                        .map(role -> new RoleDTO(
+                                role.getId(),
+                                role.getName()
+                        )).toList()
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserEntityDTO> getAllUsers() {
-        List<UsersEntity> list = repository.findAllByEnabled(true);
+        List<UserEntity> list = repository.findAllByEnabled(true);
         if (list.isEmpty()) {
             throw new NoSuchElementException("Users not found");
         }
         return list.stream().map(user -> new UserEntityDTO(
-                user.getId(),
+                String.valueOf(user.getId()),
                 user.getUsername(),
                 user.getPassword(),
-                user.getEmail()
+                user.getEmail(),
+                user.isAdmin(),
+                user.getRoles().stream().map(role -> new RoleDTO(
+                        role.getId(),
+                        role.getName()
+                )).toList()
         )).toList();
     }
 
@@ -107,11 +174,10 @@ public class UserEntityServiceImpl implements UserEntityService {
     @Transactional
     public void deleteUser(Long id) {
         try {
-            UsersEntity usersEntity = repository.findByIdAndEnabled(id, true).orElseThrow();
-            usersEntity.setEnabled(false);
-            repository.save(usersEntity);
-        }
-        catch (NoSuchElementException e) {
+            UserEntity userEntity = repository.findByIdAndEnabled(id, true).orElseThrow();
+            userEntity.setEnabled(false);
+            repository.save(userEntity);
+        } catch (NoSuchElementException e) {
             throw new NoSuchElementException("User not found");
         }
     }

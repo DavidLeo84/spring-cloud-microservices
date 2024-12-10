@@ -1,13 +1,14 @@
 package co.edu.uniquindio.msvc_users.controllers;
 
-import co.edu.uniquindio.msvc_users.Dtos.UserEntityDTO;
+import co.edu.uniquindio.msvc_users.dtos.MessageDTO;
+import co.edu.uniquindio.msvc_users.dtos.UpdateDTO;
+import co.edu.uniquindio.msvc_users.dtos.UserEntityDTO;
 import co.edu.uniquindio.msvc_users.services.UserEntityService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -20,50 +21,66 @@ public class UserEntityController {
     }
 
     @PostMapping
-    public ResponseEntity<?> saveUser(@Valid @RequestBody UserEntityDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userEntityService.saveUser(dto));
-    }
-
-    @PutMapping
-    public ResponseEntity<?> updateUser(@Valid @RequestBody UserEntityDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userEntityService.updateUser(dto));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+    public ResponseEntity<MessageDTO<String>> saveUser(@Valid @RequestBody UserEntityDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(userEntityService.getUserById(id));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "User not found"));
+            userEntityService.saveUser(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO<>(false, "User created"));
+        }
+        catch (NoSuchElementException e){
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessageDTO<>(true, e.getMessage()));
         }
     }
 
-    @GetMapping("/{username}")
-    public ResponseEntity<?> getUserByUsername(@Valid @PathVariable String username) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MessageDTO<?>> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateDTO dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(userEntityService.getUserByUsername(username, true));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new MessageDTO<>(false, userEntityService.updateUser(id, dto)));
+        }
+        catch (NoSuchElementException e){
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessageDTO<>(true, e.getMessage()));
+        } catch (Throwable e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MessageDTO<?>> getUserById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new MessageDTO<>(false, userEntityService.getUserById(id)));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "User not found"));
+            //return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageDTO<>(true, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/username")
+    public ResponseEntity<MessageDTO<?>> getUserByUsername(@Valid @RequestParam String username) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(new MessageDTO<>(false,
+                    userEntityService.getUserByUsername(username, true)));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new MessageDTO<>(true, userEntityService.getUserByUsername(username, true)));
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<MessageDTO<?>> getAllUsers() {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(userEntityService.getAllUsers());
+            return ResponseEntity.status(HttpStatus.OK).body(new MessageDTO<>(false, userEntityService.getAllUsers()));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "Users not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageDTO<>(true, e.getMessage()));
         }
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<?> deleteUser(@Valid @PathVariable Long id) {
+    public ResponseEntity<MessageDTO<?>> deleteUser(@Valid @PathVariable Long id) {
         try {
             userEntityService.deleteUser(id);
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("message", "User not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageDTO<>(false,"User not found"));
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Collections.singletonMap("message", "User eliminated"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new MessageDTO<>(true,"User deleted"));
     }
 }

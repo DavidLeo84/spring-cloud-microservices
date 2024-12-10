@@ -33,6 +33,12 @@ spring:
         locator:
           enabled: true
       routes:
+      - id: msvc-users
+        uri: lb://msvc-users
+        predicates:
+        - Path=/api/users/**
+        filters:
+        - StripPrefix=2
       - id: msvc-products
         uri: lb://msvc-products
         predicates:

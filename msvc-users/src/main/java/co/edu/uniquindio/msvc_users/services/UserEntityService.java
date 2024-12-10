@@ -1,6 +1,7 @@
 package co.edu.uniquindio.msvc_users.services;
 
-import co.edu.uniquindio.msvc_users.Dtos.UserEntityDTO;
+import co.edu.uniquindio.msvc_users.dtos.UpdateDTO;
+import co.edu.uniquindio.msvc_users.dtos.UserEntityDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,9 +9,9 @@ import java.util.List;
 @Service
 public interface UserEntityService {
 
-    UserEntityDTO saveUser(UserEntityDTO dto);
+    void saveUser(UserEntityDTO dto);
 
-    UserEntityDTO updateUser(UserEntityDTO dto);
+    UserEntityDTO updateUser(Long id, UpdateDTO dto) throws Throwable;
 
     UserEntityDTO getUserById(Long id);
 

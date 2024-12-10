@@ -1,12 +1,13 @@
-package co.edu.uniquindio.msvc_users.Dtos;
+package co.edu.uniquindio.msvc_users.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 public record UserEntityDTO(
 
-        @NotBlank
-        Long id,
+        String id,
 
         @NotBlank
         String username,
@@ -16,6 +17,10 @@ public record UserEntityDTO(
 
         @Email
         @NotBlank
-        String email
+        String email,
+
+        boolean admin,
+
+        List<RoleDTO> roles
 ) {
 }
