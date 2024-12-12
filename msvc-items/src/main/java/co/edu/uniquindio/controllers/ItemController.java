@@ -68,7 +68,7 @@ public class ItemController {
         return itemService.findAll();
     }
 
-    @GetMapping("/{id}")
+    /*@GetMapping("/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id) throws WebClientResponseException {
         //Bloque comentado para la implementación de las pruebas con el circuit-breaker
         Item item = breaker.create("items").run(() -> itemService.findById(id) , e ->{
@@ -85,7 +85,7 @@ public class ItemController {
             return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
         }
         return ResponseEntity.ok().body(item);
-    }
+    }*/
 
     @CircuitBreaker(name = "items", fallbackMethod = "getFallBackMethodProduct")
     @GetMapping("/details/{id}")
@@ -99,8 +99,9 @@ public class ItemController {
 
     @TimeLimiter(name = "items")
     @CircuitBreaker(name = "items", fallbackMethod = "getFallBackMethodProduct2")
-    @GetMapping("/details2/{id}")
-    public CompletableFuture<ResponseEntity<?>> getById(@PathVariable Long id) throws WebClientResponseException {
+    @GetMapping("/{id}")
+//    @GetMapping("/details2/{id}")
+    public CompletableFuture<ResponseEntity<?>> getItemById(@PathVariable Long id) throws WebClientResponseException {
         return CompletableFuture.supplyAsync(() -> {
 
             Item item = itemService.findById(id);
