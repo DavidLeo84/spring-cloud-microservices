@@ -53,17 +53,14 @@ public class UserEntityController {
         }
     }
 
-    @GetMapping("/username")
-    public ResponseEntity<MessageDTO<?>> getUserByUsername(@Valid @RequestParam String username) {
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserEntityDTO> getUserByUsername(@PathVariable String username) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(new MessageDTO<>(false,
-                    userEntityService.getUserByUsername(username, true)));
+            return ResponseEntity.status(HttpStatus.OK).body(userEntityService.getUserByUsername(username, true));
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new MessageDTO<>(true, userEntityService.getUserByUsername(username, true)));
-        }
+            return ResponseEntity.notFound().build();
     }
-
+}
     @GetMapping
     public ResponseEntity<MessageDTO<?>> getAllUsers() {
         try {

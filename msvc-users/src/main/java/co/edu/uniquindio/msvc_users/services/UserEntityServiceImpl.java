@@ -7,7 +7,6 @@ import co.edu.uniquindio.msvc_users.entities.RoleEntity;
 import co.edu.uniquindio.msvc_users.entities.UserEntity;
 import co.edu.uniquindio.msvc_users.repositories.RoleRepository;
 import co.edu.uniquindio.msvc_users.repositories.UserEntityRepository;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

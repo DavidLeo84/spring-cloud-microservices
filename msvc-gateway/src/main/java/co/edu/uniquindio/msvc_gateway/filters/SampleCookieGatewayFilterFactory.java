@@ -1,5 +1,10 @@
 package co.edu.uniquindio.msvc_gateway.filters;
 
+public class SampleCookieGatewayFilterFactory {
+
+}
+
+/* configuracion para filtros reactivos
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,4 +56,4 @@ public class SampleCookieGatewayFilterFactory extends AbstractGatewayFilterFacto
         private String value;
         private String message;
     }
-}
+}*/

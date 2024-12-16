@@ -1,19 +1,20 @@
 package co.edu.uniquindio.msvc_oauth2.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
-
-public class UserEntity {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class UserEntity implements Serializable {
 
     Long id;
 
@@ -27,6 +28,6 @@ public class UserEntity {
 
     String email;
 
-    List<RoleEntity> roles = new ArrayList<>();
+    List<RoleEntity> roles;
 
 }

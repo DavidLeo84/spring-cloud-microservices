@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 
-@Controller
+@RestController
 public class ProductController {
 
     private final ProductService productService;
@@ -47,23 +47,22 @@ public class ProductController {
         return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));*/
         //Bloque comentado para la implementación de las pruebas con el circuit-breaker
         try {
-            ProductDTO dto =  productService.getProduct(id);
-        }
-        catch (Exception e) {
+            productService.getProduct(id);
+        } catch (Exception e) {
             return ResponseEntity.status(404).body(Collections.singletonMap("message", "No existe el producto"));
         }
         return ResponseEntity.ok().body(this.productService.getProduct(id));
     }
 
     @PostMapping
-    public ResponseEntity<MessageDTO<String>> createProduct(@RequestBody ProductDTO productDTO) throws Exception {
+    public ResponseEntity<MessageDTO<String>> createProduct(@RequestBody ProductDTO productDTO) {
 
         productService.createProduct(productDTO);
         return ResponseEntity.ok().body(new MessageDTO<>(false, "Producto creado correctamente"));
     }
 
     @PutMapping
-    public ResponseEntity<MessageDTO<ProductDTO>> updateProduct(@RequestBody ProductDTO dto) throws Exception {
+    public ResponseEntity<MessageDTO<ProductDTO>> updateProduct(@RequestBody ProductDTO dto) {
 
         ProductDTO productDTO;
         try {
@@ -75,7 +74,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) throws Exception {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
 
         try {
             productService.deleteProduct(id);

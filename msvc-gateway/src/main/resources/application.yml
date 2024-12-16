@@ -52,43 +52,44 @@ spring:
       discovery:
         locator:
           enabled: true
-      routes:
-        - id: msvc-oauth2
-          uri: lb://msvc-oauth2
-          predicates:
-            - Path=/api/security/**
-          filters:
-            - StripPrefix=2
-        - id: msvc-users
-          uri: lb://msvc-users
-          predicates:
-            - Path=/api/users/**
-          filters:
-            - StripPrefix=2
-        - id: msvc-products
-          uri: lb://msvc-products
-          predicates:
-            - Path=/api/products/**
-          #        - Header=token, 1234567
-          #        - Method=GET, POST
-          #        - Query=color, verde
-          #        - Cookie=color, azul
-          #        - Header=Content-Type, application/json
-          filters:
-            - StripPrefix=2
-            - SampleCookie= user, Leo, ¡Hola mi mensaje es personalizado para productos
-            - name: CircuitBreaker
-              args:
-                name: = products
-                statusCodes: 500
-                fallbackUri: forward:/api/items/5
-        - id: msvc-items
-          uri: lb://msvc-items
-          predicates:
-            - Path=/api/items/**
-          filters:
-            - StripPrefix=2
-            - AddRequestHeader=token-request, adhsadavdsopajdsakhdkaslkdskj
-            - AddResponseHeader=token-response, 232343243827
-            - AddRequestParameter=name, Leo
-            - SetResponseHeader=Content-Type, text/plain
+      mvc:
+        routes:
+          - id: msvc-oauth2
+            uri: lb://msvc-oauth2
+            predicates:
+              - Path=/api/security/**
+            filters:
+              - StripPrefix=2
+          - id: msvc-users
+            uri: lb://msvc-users
+            predicates:
+              - Path=/api/users/**
+            filters:
+              - StripPrefix=2
+          - id: msvc-products
+            uri: lb://msvc-products
+            predicates:
+              - Path=/api/products/**
+            # - Header=token, 1234567
+            # - Method=GET, POST
+            # - Query=color, verde
+            # - Cookie=color, azul
+            # - Header=Content-Type, application/json
+            filters:
+              - StripPrefix=2
+              # - SampleCookie= user, Leo, ¡Hola mi mensaje es personalizado para productos
+              - name: CircuitBreaker
+            args:
+              name: = products
+              statusCodes: 500
+              fallbackUri: forward:/api/items/5
+          - id: msvc-items
+            uri: lb://msvc-items
+            predicates:
+              - Path=/api/items/**
+            filters:
+              - StripPrefix=2
+              - AddRequestHeader=token-request, adhsadavdsopajdsakhdkaslkdskj
+              - AddResponseHeader=token-response, 232343243827
+              - AddRequestParameter=name, Leo
+              - SetResponseHeader=Content-Type, text/plain
